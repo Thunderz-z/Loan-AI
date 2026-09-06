@@ -1,0 +1,16 @@
+{
+  "name": "loanlens",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.ts",
+    "build": "cd frontend && npm run build && cd .. && rm -rf dist && cp -r frontend/dist dist",
+    "lint": "cd frontend && npm run lint",
+    "start": "node server.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}

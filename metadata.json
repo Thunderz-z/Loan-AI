@@ -1,0 +1,8 @@
+{
+  "name": "LoanLens - AI Loan Risk & Decision Platform",
+  "description": "Explainable AI loan risk evaluation system using XGBoost, SHAP feature attribution, interactive what-if simulation, and AI decision assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
