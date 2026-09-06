@@ -1,0 +1,50 @@
+{
+    "model_name": "LoanLens XGBoost Risk Model",
+    "model_type": "XGBoost Classifier",
+    "version": "1.0",
+    "target": {
+        "0": "Fully Paid",
+        "1": "Default / Charged Off"
+    },
+    "training_rows": 159957,
+    "test_rows": 39990,
+    "feature_count": 24,
+    "features": [
+        "loan_amnt",
+        "term",
+        "int_rate",
+        "installment",
+        "annual_inc",
+        "dti",
+        "open_acc",
+        "pub_rec",
+        "revol_bal",
+        "revol_util",
+        "total_acc",
+        "delinq_2yrs",
+        "inq_last_6mths",
+        "mort_acc",
+        "pub_rec_bankruptcies",
+        "credit_score",
+        "loan_to_income",
+        "monthly_income",
+        "installment_to_income",
+        "total_credit_accounts",
+        "emp_length",
+        "home_ownership",
+        "verification_status",
+        "purpose"
+    ],
+    "scale_pos_weight": 4.0080463368816535,
+    "evaluation": {
+        "accuracy": 0.6642410602650662,
+        "roc_auc": 0.7183006823155078,
+        "pr_auc": 0.37966552130782105,
+        "precision": 0.3273258027668486,
+        "recall": 0.6459611772072636,
+        "f1": 0.4344859537547909
+    },
+    "random_state": 42,
+    "test_size": 0.2,
+    "sample_size": 200000
+}

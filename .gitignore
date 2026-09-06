@@ -1,0 +1,12 @@
+# Exclude heavy dataset & virtual environments
+dataset/
+venv/
+__pycache__/
+.env
+.DS_Store
+
+# Exclude heavy binary model files
+models/*.pkl
+.vscode/
+frontend/node_modules/
+frontend/dist/
