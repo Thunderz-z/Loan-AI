@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node server.ts",
-    "build": "cd frontend && npm run build && cd .. && rm -rf dist && cp -r frontend/dist dist",
-    "lint": "cd frontend && npm run lint",
-    "start": "node server.ts"
+    "dev": "node server.js",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
