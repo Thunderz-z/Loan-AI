@@ -7,8 +7,8 @@ import NewApplication from './pages/NewApplication';
 import DecisionAnalysis from './pages/DecisionAnalysis';
 import AuditHistory from './pages/AuditHistory';
 import Insights from './pages/Insights';
+import AgentStudio from './pages/AgentStudio';
 import { api } from './api';
-import { Sparkles } from 'lucide-react';
 
 export default function App() {
   const [systemHealth, setSystemHealth] = useState(null);
@@ -39,8 +39,26 @@ export default function App() {
         {/* Main Routed Page Content */}
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
           <Routes>
+            {/* Primary Interaction Interface: AI Agent Studio */}
             <Route 
               path="/" 
+              element={
+                <AgentStudio 
+                  onSelectApplication={(app) => setCurrentApplication(app)}
+                />
+              } 
+            />
+            <Route 
+              path="/agent-studio" 
+              element={
+                <AgentStudio 
+                  onSelectApplication={(app) => setCurrentApplication(app)}
+                />
+              } 
+            />
+            {/* Auxiliary Telemetry Views */}
+            <Route 
+              path="/dashboard" 
               element={
                 <Dashboard 
                   onSelectApplication={(app) => setCurrentApplication(app)}
@@ -80,20 +98,6 @@ export default function App() {
             />
           </Routes>
         </main>
-
-        {/* Floating Quick Copilot Trigger Button (Bottom-Right) */}
-        <div className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => setIsCopilotOpen(true)}
-            className="group flex items-center space-x-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 text-white font-semibold shadow-2xl shadow-indigo-600/40 hover:shadow-indigo-500/60 hover:scale-105 active:scale-95 transition-all"
-            title="Open LoanLens Copilot"
-          >
-            <Sparkles className="w-5 h-5 text-amber-300 group-hover:rotate-12 transition-transform" />
-            <span className="text-xs sm:text-sm font-bold tracking-wide">
-              AI Decision Copilot
-            </span>
-          </button>
-        </div>
 
         {/* Persistent AI Assistant Slide-over Drawer */}
         <AiAssistantDrawer

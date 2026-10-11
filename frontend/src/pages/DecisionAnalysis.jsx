@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -12,7 +12,11 @@ import {
   User, 
   TrendingUp,
   Percent,
-  CheckCircle2
+  CheckCircle2,
+  Zap,
+  ArrowRight,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import RiskGauge from '../components/RiskGauge';
 import ShapChart from '../components/ShapChart';
@@ -30,6 +34,7 @@ export default function DecisionAnalysis({
   const [application, setApplication] = useState(currentApplication);
   const [loading, setLoading] = useState(!currentApplication && Boolean(appId));
   const [error, setError] = useState(null);
+  const [showManualSliders, setShowManualSliders] = useState(false);
 
   // If application not in memory, fetch from SQLite audit endpoint
   useEffect(() => {
@@ -138,14 +143,12 @@ export default function DecisionAnalysis({
           </div>
         </div>
 
-        {/* Copilot Launcher with this context */}
-        <button
-          onClick={onOpenCopilot}
-          className="inline-flex items-center space-x-2 px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 hover:text-white text-xs font-semibold transition-all shadow-md active:scale-95"
-        >
-          <Sparkles className="w-4 h-4 text-amber-300" />
-          <span>Ask Copilot About This Decision</span>
-        </button>
+        {/* Right Breadcrumb Info */}
+        <div className="flex items-center space-x-2 text-xs text-gray-400">
+          <span className="px-2.5 py-1 rounded-lg bg-gray-900 border border-gray-800 font-mono text-[11px]">
+            Model: LendingClub XGB-v1.0
+          </span>
+        </div>
       </div>
 
       {/* Top Grid: Risk Gauge Card + Applicant Quick Profile Card */}
@@ -154,24 +157,26 @@ export default function DecisionAnalysis({
         {/* Risk Gauge Card */}
         <div className="lg:col-span-1 bg-gray-900/90 border border-gray-800 rounded-xl p-6 shadow-xl flex flex-col items-center justify-between">
           <div className="w-full text-left border-b border-gray-800 pb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              Evaluated Default Risk
+            <span className="text-xs font-bold uppercase tracking-wider text-gray-400 block">
+              Evaluated Default Risk Meter
             </span>
-            <div className="text-xs text-gray-500">
-              3-Tier Threshold Policy (<span className="text-emerald-400">&lt;15%</span> | <span className="text-amber-400">15-30%</span> | <span className="text-rose-400">&gt;30%</span>)
+            <div className="text-[11px] text-gray-500 mt-0.5">
+              Calibrated Policy Bands (<span className="text-emerald-400 font-mono">&lt;15%</span> | <span className="text-amber-400 font-mono">15-30%</span> | <span className="text-rose-400 font-mono">&gt;30%</span>)
             </div>
           </div>
 
-          <RiskGauge riskScore={riskScore} decision={decision} size={250} />
+          <div className="w-full py-2 flex items-center justify-center">
+            <RiskGauge riskScore={riskScore} decision={decision} size={280} />
+          </div>
 
-          <div className="w-full grid grid-cols-2 gap-2 text-center text-xs mt-2 pt-3 border-t border-gray-800/80">
+          <div className="w-full grid grid-cols-2 gap-2 text-center text-xs mt-3 pt-3 border-t border-gray-800/80">
             <div className="p-2 rounded-lg bg-gray-950/60 border border-gray-800/80">
-              <span className="text-gray-500 text-[10px] uppercase block">Decision</span>
-              <span className="font-bold text-white">{decision}</span>
+              <span className="text-gray-500 text-[10px] uppercase block">Assigned Tier</span>
+              <span className="font-bold text-cyan-400 font-mono">{application.risk_category || 'Moderate'}</span>
             </div>
             <div className="p-2 rounded-lg bg-gray-950/60 border border-gray-800/80">
-              <span className="text-gray-500 text-[10px] uppercase block">Risk Tier</span>
-              <span className="font-bold text-cyan-400">{application.risk_category || 'Moderate'}</span>
+              <span className="text-gray-500 text-[10px] uppercase block">SHAP Base Odds</span>
+              <span className="font-bold text-gray-300 font-mono">{((application.base_risk || 0.4336) * 100).toFixed(1)}%</span>
             </div>
           </div>
         </div>
@@ -270,8 +275,101 @@ export default function DecisionAnalysis({
         finalRisk={riskScore / 100.0} 
       />
 
-      {/* Interactive What-If Simulator */}
-      <WhatIfSimulator application={application} />
+      {/* Autonomous AI Scenario Studio Callout Banner */}
+      <div className="bg-gradient-to-r from-indigo-950/60 via-gray-900 to-gray-950 border border-indigo-500/30 rounded-2xl p-6 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3.5">
+            <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <Sparkles className="w-6 h-6 text-amber-300 animate-pulse" />
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h3 className="text-base font-bold text-white">
+                  Autonomous AI Underwriting & Optimization Studio
+                </h3>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  AGENTIC
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Execute automated counterfactual goal optimization, stress testing, and FCRA adverse action generation.
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to={`/agent-studio?id=${application.id}`}
+            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all self-start sm:self-auto"
+          >
+            <span>Open in AI Studio</span>
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
+        {/* Quick Goal Prompts */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-gray-800/80">
+          <Link
+            to={`/agent-studio?id=${application.id}`}
+            className="p-3 rounded-xl bg-gray-950/60 hover:bg-gray-950 border border-gray-800/80 hover:border-indigo-500/40 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-indigo-300 block mb-1">
+              🎯 Auto-Optimize Terms
+            </span>
+            <span className="text-[11px] text-gray-400 block">
+              Calculates feasible counterfactual parameter shifts to minimize default risk.
+            </span>
+          </Link>
+
+          <Link
+            to={`/agent-studio?id=${application.id}`}
+            className="p-3 rounded-xl bg-gray-950/60 hover:bg-gray-950 border border-gray-800/80 hover:border-amber-500/40 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-amber-300 block mb-1">
+              📉 Macroeconomic Stress Test
+            </span>
+            <span className="text-[11px] text-gray-400 block">
+              Simulates a 20% income contraction and rate hike shock.
+            </span>
+          </Link>
+
+          <Link
+            to={`/agent-studio?id=${application.id}`}
+            className="p-3 rounded-xl bg-gray-950/60 hover:bg-gray-950 border border-gray-800/80 hover:border-rose-500/40 text-left transition-all group"
+          >
+            <span className="text-xs font-bold text-white group-hover:text-rose-300 block mb-1">
+              ⚖️ FCRA §615(a) Adverse Notice
+            </span>
+            <span className="text-[11px] text-gray-400 block">
+              Extracts regulatory top 4 SHAP negative disclosures.
+            </span>
+          </Link>
+        </div>
+      </div>
+
+      {/* Expandable Manual Fine-Tuning Sliders (Secondary) */}
+      <div className="bg-gray-900/60 border border-gray-800/80 rounded-xl overflow-hidden">
+        <button
+          onClick={() => setShowManualSliders(prev => !prev)}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-800/40 transition-colors"
+        >
+          <div className="flex items-center space-x-2 text-xs text-gray-400">
+            <Sliders className="w-4 h-4 text-gray-500" />
+            <span className="font-semibold text-gray-300">
+              Manual Parameter Fine-Tuning (Alternative to AI Studio)
+            </span>
+          </div>
+          <div className="flex items-center space-x-1 text-xs text-gray-500">
+            <span>{showManualSliders ? 'Hide Sliders' : 'Show Sliders'}</span>
+            {showManualSliders ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </div>
+        </button>
+
+        {showManualSliders && (
+          <div className="p-4 pt-0 border-t border-gray-800/60">
+            <WhatIfSimulator application={application} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

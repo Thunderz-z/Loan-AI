@@ -50,8 +50,8 @@ Real-time counterfactual simulation sliders allowing underwriters to test debt c
   Interactive sliders allow loan officers to simulate financial adjustments (e.g., increasing income, paying down revolving credit, lowering requested loan amount) and visualize instantaneous decision threshold changes.
 * **📜 Regulatory Adverse Action Notice Generator:**
   Automatically formats top risk drivers into legally compliant statements aligned with the **Fair Credit Reporting Act (FCRA)** and **Equal Credit Opportunity Act (ECOA)**.
-* **🤖 Autonomous AI Underwriting Copilot:**
-  Slide-over assistant drawer that utilizes structured tool calling (`get_application`, `explain_decision`, `run_what_if`, `search_similar_applications`) to answer inquiries, compare historical peers, and draft governance memos.
+* **🤖 Autonomous AI Underwriter Studio (Groq LPU Powered):**
+  Full-screen dedicated agentic workspace where the loan officer can issue natural language directives to the AI to execute counterfactual optimizations, macroeconomic stress tests, and FCRA/ECOA disclosures. Supports **`qwen/qwen3.8-27b`**, **`openai/gpt-oss-120b`**, and Groq LPU acceleration with live before/after risk canvases and tool invocation traces.
 * **🗄️ SQLite Audit Trail & CSV Governance:**
   Every application evaluation is permanently logged in a local SQLite database (`backend/loanlens.db`) with one-click CSV export for internal compliance and regulatory audits.
 

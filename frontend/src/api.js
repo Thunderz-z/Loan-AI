@@ -96,6 +96,17 @@ export const api = {
     }
   },
 
+  // Update Application in Database Store
+  async updateApplication(id, updateData) {
+    try {
+      const res = await apiClient.put(`/applications/${id}`, updateData);
+      return res.data;
+    } catch (err) {
+      console.error(`Error updating application /applications/${id}:`, err);
+      throw err;
+    }
+  },
+
   // Portfolio Insights
   async getInsights() {
     try {
@@ -107,20 +118,44 @@ export const api = {
     }
   },
 
-  // AI Copilot Agent
-  async queryAgent(query, applicationData = null, applicationId = null) {
+  // System Configuration & AI Models
+  async getConfig() {
     try {
+      const res = await apiClient.get('/config');
+      return res.data;
+    } catch {
+      return {
+        has_groq_key: false,
+        default_model: 'qwen/qwen3.8-27b',
+        supported_models: [
+          { id: 'qwen/qwen3.8-27b', name: 'Qwen 3.8 27B', tag: 'Fast Reasoning · Analytical' },
+          { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120B', tag: 'High Capacity · Policy Reasoning' },
+          { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B', tag: 'Groq Versatile' }
+        ]
+      };
+    }
+  },
+
+  // AI Copilot Agent Studio
+  async queryAgent(query, applicationData = null, applicationId = null, model = 'qwen/qwen3.8-27b', apiKey = null) {
+    try {
+      const headers = {};
+      if (apiKey) {
+        headers['x-groq-api-key'] = apiKey;
+      }
       const res = await apiClient.post('/agent', {
         query,
         application_data: applicationData,
         application_id: applicationId,
-      });
+        model,
+      }, { headers });
       return res.data;
     } catch (err) {
       console.error('Error in /agent:', err);
       return {
-        reply: "The LoanLens Copilot is temporarily offline. The backend decision thresholds are: <15% Approve, 15-30% Review, >30% Reject.",
-        tool_calls: []
+        reply: "The Autonomous Agent is currently evaluating with local safety parameters. The active policy thresholds are: <15% Approve, 15-30% Review, >30% Reject.",
+        tool_calls: [],
+        tool_type: 'analysis'
       };
     }
   }

@@ -1,175 +1,306 @@
-import React from 'react';
 import { ShieldCheck, AlertTriangle, ShieldX } from 'lucide-react';
 
-export default function RiskGauge({ riskScore = 0, decision = 'REVIEW', size = 260 }) {
-  // Ensure risk is clamped between 0 and 100
+export default function RiskGauge({ 
+  riskScore = 0, 
+  decision = 'REVIEW', 
+  size = 280, 
+  showDetails = true 
+}) {
+  // Clamp score between 0.0 and 100.0
   const score = Math.min(100, Math.max(0, Number(riskScore) || 0));
 
-  // Gauge geometry
-  const radius = 90;
-  const strokeWidth = 14;
-  const cx = 130;
-  const cy = 130;
-  
-  // Circumference for 180-degree arc
-  const arcLength = Math.PI * radius; // Half circumference
-  const strokeDashoffset = arcLength - (score / 100) * arcLength;
+  // Determine policy tier based on actual score
+  const isApprove = score < 15.0;
+  const isReview = score >= 15.0 && score <= 30.0;
+  const isReject = score > 30.0;
 
-  // Decision styles
-  const getDecisionStyle = () => {
-    switch (decision) {
-      case 'APPROVE':
-        return {
-          textColor: 'text-emerald-400',
-          bgColor: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
-          gradientId: 'gaugeApproveGrad',
-          strokeColor: '#10b981',
-          label: 'APPROVE',
-          subtext: 'Auto-Clear (< 15% Risk)',
-          icon: ShieldCheck
-        };
-      case 'REVIEW':
-        return {
-          textColor: 'text-amber-400',
-          bgColor: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
-          gradientId: 'gaugeReviewGrad',
-          strokeColor: '#f59e0b',
-          label: 'MANUAL REVIEW',
-          subtext: 'Underwriter Review (15% - 30%)',
-          icon: AlertTriangle
-        };
-      case 'REJECT':
-      default:
-        return {
-          textColor: 'text-rose-400',
-          bgColor: 'bg-rose-500/10 border-rose-500/30 text-rose-300',
-          gradientId: 'gaugeRejectGrad',
-          strokeColor: '#ef4444',
-          label: 'REJECT',
-          subtext: 'High Default Risk (> 30%)',
-          icon: ShieldX
-        };
+  // Normalized decision styling
+  const getDecisionMeta = () => {
+    if (decision === 'APPROVE' || isApprove) {
+      return {
+        label: 'APPROVE',
+        subtext: 'Auto-Clear (< 15% Risk Threshold)',
+        badgeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300',
+        textColor: 'text-emerald-400',
+        strokeColor: '#10b981',
+        icon: ShieldCheck,
+        tierName: 'Low Risk Tier'
+      };
     }
+    if (decision === 'REVIEW' || isReview) {
+      return {
+        label: 'MANUAL REVIEW',
+        subtext: 'Underwriter Review Required (15% - 30%)',
+        badgeBg: 'bg-amber-500/10 border-amber-500/30 text-amber-300',
+        textColor: 'text-amber-400',
+        strokeColor: '#f59e0b',
+        icon: AlertTriangle,
+        tierName: 'Moderate Risk Tier'
+      };
+    }
+    return {
+      label: 'REJECT',
+      subtext: 'High Default Risk (> 30% Threshold)',
+      badgeBg: 'bg-rose-500/10 border-rose-500/30 text-rose-300',
+      textColor: 'text-rose-400',
+      strokeColor: '#ef4444',
+      icon: ShieldX,
+      tierName: 'High Risk Tier'
+    };
   };
 
-  const style = getDecisionStyle();
-  const IconComponent = style.icon;
+  const meta = getDecisionMeta();
+  const IconComponent = meta.icon;
 
-  // Needle angle: from -90 deg (0%) to +90 deg (100%)
+  // Gauge Geometry:
+  // Center (cx, cy) = (140, 135), Radius = 95
+  // Semicircle from left (180 deg) to right (0 deg)
+  // Total arc length: PI * 95 ≈ 298.45
+  const cx = 140;
+  const cy = 135;
+  const radius = 95;
+  const arcLength = Math.PI * radius; // 298.45
+  const strokeDashoffset = arcLength - (score / 100) * arcLength;
+
+  // Needle angle: -90° at 0%, 0° at 50%, +90° at 100%
   const needleAngle = (score / 100) * 180 - 90;
 
   return (
-    <div className="flex flex-col items-center justify-center p-4">
-      {/* Gauge SVG */}
-      <div className="relative" style={{ width: size, height: size * 0.65 }}>
+    <div className="flex flex-col items-center justify-center w-full select-none">
+      {/* 1. TOP: The Center Meter Gauge (Zero text inside sweep area, meter is completely ABOVE) */}
+      <div 
+        className="w-full flex items-center justify-center"
+        style={{ maxWidth: size }}
+      >
         <svg
-          viewBox="0 0 260 160"
-          className="w-full h-full overflow-visible"
+          viewBox="0 0 280 150"
+          className="w-full h-auto overflow-visible"
         >
           <defs>
-            {/* Background track gradient */}
-            <linearGradient id="gaugeTrack" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#064e3b" />
-              <stop offset="15%" stopColor="#10b981" />
-              <stop offset="30%" stopColor="#f59e0b" />
-              <stop offset="60%" stopColor="#ef4444" />
-              <stop offset="100%" stopColor="#991b1b" />
-            </linearGradient>
-
-            {/* Glowing filter for needle */}
-            <filter id="needleGlow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="1" stdDeviation="3" floodColor={style.strokeColor} floodOpacity="0.6"/>
+            {/* Active needle glow */}
+            <filter id="gaugeGlow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="2" stdDeviation="4" floodColor={meta.strokeColor} floodOpacity="0.5" />
             </filter>
           </defs>
 
-          {/* Background Track Arc */}
+          {/* Background Track - 3 Distinct Regulatory Policy Zones */}
+          {/* Zone 1: 0% to 15% (Emerald - Safe Auto-Approve Zone) */}
           <path
-            d="M 40 130 A 90 90 0 0 1 220 130"
+            d="M 45 135 A 95 95 0 0 1 55.35 91.87"
             fill="none"
-            stroke="#1e293b"
-            strokeWidth={strokeWidth}
+            stroke="#064e3b"
+            strokeWidth="12"
             strokeLinecap="round"
+            className="opacity-70"
           />
 
-          {/* Color-Zone Reference Track */}
+          {/* Zone 2: 15% to 30% (Amber - Manual Underwriting Zone) */}
           <path
-            d="M 40 130 A 90 90 0 0 1 220 130"
+            d="M 55.35 91.87 A 95 95 0 0 1 84.16 58.14"
             fill="none"
-            stroke="url(#gaugeTrack)"
-            strokeWidth={strokeWidth - 6}
-            strokeLinecap="round"
-            strokeOpacity="0.25"
+            stroke="#78350f"
+            strokeWidth="12"
+            className="opacity-70"
           />
 
-          {/* Active Progress Arc */}
+          {/* Zone 3: 30% to 100% (Rose - Elevated Default Risk Zone) */}
           <path
-            d="M 40 130 A 90 90 0 0 1 220 130"
+            d="M 84.16 58.14 A 95 95 0 0 1 235 135"
             fill="none"
-            stroke={style.strokeColor}
-            strokeWidth={strokeWidth}
+            stroke="#7f1d1d"
+            strokeWidth="12"
+            strokeLinecap="round"
+            className="opacity-70"
+          />
+
+          {/* Active Illuminated Progress Arc */}
+          <path
+            d="M 45 135 A 95 95 0 0 1 235 135"
+            fill="none"
+            stroke={meta.strokeColor}
+            strokeWidth="12"
             strokeDasharray={arcLength}
             strokeDashoffset={strokeDashoffset}
             strokeLinecap="round"
             className="transition-all duration-700 ease-out"
           />
 
-          {/* 15% Threshold Marker */}
-          <g transform={`rotate(${0.15 * 180 - 90} 130 130)`}>
-            <line x1="130" y1="32" x2="130" y2="44" stroke="#94a3b8" strokeWidth="2" strokeDasharray="2 2" />
-          </g>
-          <text x="75" y="48" fill="#64748b" fontSize="9" fontWeight="600">15%</text>
+          {/* Boundary Divider Ticks outside track */}
+          {/* 15% Tick */}
+          <line
+            x1="48.5"
+            y1="88.3"
+            x2="42.3"
+            y2="85.1"
+            stroke="#10b981"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
 
-          {/* 30% Threshold Marker */}
-          <g transform={`rotate(${0.30 * 180 - 90} 130 130)`}>
-            <line x1="130" y1="32" x2="130" y2="44" stroke="#94a3b8" strokeWidth="2" strokeDasharray="2 2" />
-          </g>
-          <text x="110" y="32" fill="#64748b" fontSize="9" fontWeight="600">30%</text>
+          {/* 30% Tick */}
+          <line
+            x1="78.9"
+            y1="50.9"
+            x2="74.2"
+            y2="44.4"
+            stroke="#f59e0b"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
 
-          {/* Needle Indicator */}
-          <g transform={`rotate(${needleAngle} 130 130)`} filter="url(#needleGlow)" className="transition-transform duration-700 ease-out">
-            <line
-              x1="130"
-              y1="130"
-              x2="130"
-              y2="46"
-              stroke="#ffffff"
-              strokeWidth="3.5"
-              strokeLinecap="round"
+          {/* Peripheral Scale Labels (Cleanly positioned on the outer perimeter, zero collision) */}
+          <text
+            x="24"
+            y="140"
+            textAnchor="middle"
+            fill="#64748b"
+            fontSize="10"
+            fontWeight="600"
+            className="font-mono"
+          >
+            0%
+          </text>
+
+          <text
+            x="32"
+            y="80"
+            textAnchor="end"
+            fill="#34d399"
+            fontSize="10"
+            fontWeight="700"
+            className="font-mono"
+          >
+            15%
+          </text>
+
+          <text
+            x="64"
+            y="32"
+            textAnchor="middle"
+            fill="#fbbf24"
+            fontSize="10"
+            fontWeight="700"
+            className="font-mono"
+          >
+            30%
+          </text>
+
+          <text
+            x="256"
+            y="140"
+            textAnchor="middle"
+            fill="#64748b"
+            fontSize="10"
+            fontWeight="600"
+            className="font-mono"
+          >
+            100%
+          </text>
+
+          {/* Needle Indicator (Rotates unobstructed with zero overlapping text) */}
+          <g
+            transform={`rotate(${needleAngle} ${cx} ${cy})`}
+            filter="url(#gaugeGlow)"
+            className="transition-transform duration-700 ease-out"
+          >
+            {/* Needle Body */}
+            <polygon
+              points="138,135 142,135 140.7,52 139.3,52"
+              fill="#f8fafc"
             />
-            <line
-              x1="130"
-              y1="46"
-              x2="130"
-              y2="40"
-              stroke={style.strokeColor}
-              strokeWidth="4.5"
-              strokeLinecap="round"
+            {/* Needle Tip Indicator */}
+            <circle
+              cx="140"
+              cy="50"
+              r="3"
+              fill={meta.strokeColor}
             />
           </g>
 
-          {/* Center Pivot Point */}
-          <circle cx="130" cy="130" r="10" fill="#0f172a" stroke="#334155" strokeWidth="3" />
-          <circle cx="130" cy="130" r="4" fill={style.strokeColor} />
+          {/* Center Pivot Hub */}
+          <circle
+            cx={cx}
+            cy={cy}
+            r="10"
+            fill="#0b1324"
+            stroke="#334155"
+            strokeWidth="3"
+          />
+          <circle
+            cx={cx}
+            cy={cy}
+            r="4.5"
+            fill={meta.strokeColor}
+          />
         </svg>
+      </div>
 
-        {/* Digital Readout In Center */}
-        <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-center -mb-2">
-          <div className="text-3xl font-extrabold tracking-tight text-white flex items-baseline">
-            <span>{score.toFixed(1)}</span>
-            <span className="text-lg font-bold text-gray-400 ml-0.5">%</span>
-          </div>
-          <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
-            Default Probability
+      {/* 2. UNDER: The 23.8% Digital Score & Label Placed UNDER the Center Meter */}
+      <div className="flex flex-col items-center justify-center mt-2 text-center">
+        <div className="flex items-baseline justify-center space-x-1">
+          <span 
+            className="text-4xl sm:text-5xl font-extrabold tracking-tight font-mono drop-shadow-md"
+            style={{ color: meta.strokeColor }}
+          >
+            {score.toFixed(1)}
+          </span>
+          <span className="text-xl sm:text-2xl font-bold text-gray-400 font-mono">
+            %
           </span>
         </div>
+        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mt-0.5">
+          Default Probability
+        </span>
       </div>
 
-      {/* Decision Badge */}
-      <div className={`mt-4 inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-bold tracking-wide shadow-sm ${style.bgColor}`}>
-        <IconComponent className="w-4 h-4" />
-        <span>{style.label}</span>
-      </div>
-      <span className="text-xs text-gray-400 mt-1">{style.subtext}</span>
+      {/* 3. POLICY DETAILS & DECISION BADGE (Cleanly stacked below, no overlaps) */}
+      {showDetails && (
+        <div className="w-full mt-4 flex flex-col items-center space-y-3">
+          {/* Policy Tier Segment Strip */}
+          <div className="w-full grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-gray-950/80 border border-gray-800 text-[10px]">
+            {/* Approve zone */}
+            <div className={`py-1.5 px-2 rounded-lg text-center transition-colors ${
+              isApprove 
+                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold shadow-sm' 
+                : 'text-gray-500 bg-transparent'
+            }`}>
+              <span className="block font-mono font-semibold">0 - 15%</span>
+              <span className="block text-[9px] uppercase tracking-wide">Auto-Approve</span>
+            </div>
+
+            {/* Review zone */}
+            <div className={`py-1.5 px-2 rounded-lg text-center transition-colors ${
+              isReview 
+                ? 'bg-amber-500/20 border border-amber-500/40 text-amber-300 font-bold shadow-sm' 
+                : 'text-gray-500 bg-transparent'
+            }`}>
+              <span className="block font-mono font-semibold">15 - 30%</span>
+              <span className="block text-[9px] uppercase tracking-wide">Manual Review</span>
+            </div>
+
+            {/* Reject zone */}
+            <div className={`py-1.5 px-2 rounded-lg text-center transition-colors ${
+              isReject 
+                ? 'bg-rose-500/20 border border-rose-500/40 text-rose-300 font-bold shadow-sm' 
+                : 'text-gray-500 bg-transparent'
+            }`}>
+              <span className="block font-mono font-semibold">&gt; 30%</span>
+              <span className="block text-[9px] uppercase tracking-wide">Decline</span>
+            </div>
+          </div>
+
+          {/* Underwriting Decision Badge */}
+          <div className="flex flex-col items-center space-y-1">
+            <div className={`inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border text-xs sm:text-sm font-bold tracking-wide shadow-sm ${meta.badgeBg}`}>
+              <IconComponent className="w-4 h-4" />
+              <span>{meta.label}</span>
+            </div>
+            <span className="text-[11px] text-gray-400 font-medium">
+              {meta.subtext}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

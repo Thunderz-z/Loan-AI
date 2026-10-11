@@ -40,9 +40,28 @@ export default function Header({ systemHealth, onOpenCopilot, activeAppCount = 0
 
           {/* Navigation Links */}
           <nav className="hidden md:flex items-center space-x-1">
+            {/* Primary Interface: AI Agent Studio */}
             <NavLink
               to="/"
               end
+              className={({ isActive }) =>
+                `px-3.5 py-2 rounded-lg text-sm font-semibold transition-all flex items-center space-x-1.5 shadow-sm ${
+                  isActive
+                    ? 'bg-gradient-to-r from-indigo-600 via-indigo-500 to-violet-600 text-white shadow-indigo-500/25 border border-indigo-400/40'
+                    : 'text-indigo-300 hover:text-white hover:bg-indigo-950/40 border border-indigo-500/20'
+                }`
+              }
+            >
+              <Sparkles className="w-4 h-4 text-amber-300 animate-pulse" />
+              <span>AI Agent Studio</span>
+              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-indigo-950/80 text-amber-300 border border-amber-300/30 uppercase tracking-wider">
+                Primary
+              </span>
+            </NavLink>
+
+            {/* Auxiliary Telemetry Views */}
+            <NavLink
+              to="/dashboard"
               className={({ isActive }) =>
                 `px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-1.5 ${
                   isActive
@@ -115,7 +134,7 @@ export default function Header({ systemHealth, onOpenCopilot, activeAppCount = 0
           {/* Right Action Area */}
           <div className="flex items-center space-x-3">
             {/* Backend Status Pill */}
-            <div className="hidden lg:flex items-center space-x-2 px-2.5 py-1.5 rounded-full bg-gray-900/80 border border-gray-800 text-xs">
+            <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-gray-900/80 border border-gray-800 text-xs shadow-inner">
               <span className={`w-2 h-2 rounded-full ${isReal ? 'bg-emerald-400 animate-pulse' : 'bg-cyan-400'}`}></span>
               <span className="text-gray-300 font-medium">
                 {isReal ? 'XGBoost ML (Live)' : 'XGBoost Simulator'}
@@ -123,20 +142,6 @@ export default function Header({ systemHealth, onOpenCopilot, activeAppCount = 0
               <span className="text-gray-600">|</span>
               <span className="text-indigo-400 font-medium">SHAP Active</span>
             </div>
-
-            {/* AI Decision Copilot Button */}
-            <button
-              onClick={onOpenCopilot}
-              className="relative inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs sm:text-sm font-medium shadow-md shadow-indigo-600/25 transition-all active:scale-95"
-              title="Open AI Decision Assistant"
-            >
-              <Sparkles className="w-4 h-4 text-amber-300 animate-spin-slow" />
-              <span>AI Copilot</span>
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
-              </span>
-            </button>
           </div>
         </div>
       </div>

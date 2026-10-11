@@ -457,6 +457,7 @@ def predict_loan(app_data: LoanApplicationInput, save_to_audit: bool = True):
         "decision": result["decision"],
         "risk_category": result["risk_category"],
         "base_risk": result["base_risk"],
+        "top_factors": result["top_factors"],
         "summary": result["summary"],
         "backend_mode": result["mode"]
     }
